@@ -1,1 +1,434 @@
-Coming soon.
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Knowing Where to Go: a spatially grounded hierarchical policy for mobile manipulation in unseen environments from a single walkthrough video.">
+    <meta name="color-scheme" content="light">
+    <title>Knowing Where to Go</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+    <script type="module" src="assets/accuracy-plot.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="wordmark" href="#main" aria-label="Knowing Where to Go, home">
+        Knowing Where to Go
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#abstract">Abstract</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#takeaways">Takeaways</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero section-shell" aria-labelledby="hero-title">
+        <h1 id="hero-title">Knowing Where to Go: Generalizing Mobile Manipulation to Unseen Environments from a Single Video</h1>
+
+        <section id="abstract" class="abstract-section" aria-labelledby="abstract-title">
+          <h2 id="abstract-title">Abstract</h2>
+          <p>Vision-language-action policies have achieved impressive mobile manipulation capabilities, but remain brittle in unfamiliar multi-room environments. We find that much of this brittleness stems from failures of spatial generalization: strong policies often resort to reactive exploration when task-relevant locations move outside familiar layouts. Oracle spatial guidance largely prevents this degradation. We study how spatial context from a prior environment walkthrough video should be represented to guide mobile manipulation policies under environment shift. We find that strong in-distribution spatial prediction can be a poor predictor of out-of-distribution transfer, while models that explicitly encode 3D structure generalize more robustly to new robot environments. Building on this, we develop a hierarchical policy that uses a single environment video to provide spatially grounded guidance to a VLA. We find that navigation performance of mobile manipulation policies is heavily bottlenecked by spatial understanding, and that our strongest policy more than doubles the placement rate of its flat counterpart (24.8% vs. 10.9%) in our hardest setup.</p>
+        </section>
+      </section>
+
+      <section id="insight" class="section-shell content-section" aria-labelledby="insight-title">
+        <div class="section-intro">
+          <h2 id="insight-title">Spatial generalization in mobile manipulation</h2>
+          <p>We probe mobile manipulation policies in unfamiliar multi-room layouts, where task-relevant locations are moved to a separate room and a decoy room is added. Strong reactive policies spend substantial time exploring irrelevant locations, and their placement rates decrease. A hierarchical &pi;<sub>0.5</sub> policy with ground-truth navigation goals degrades substantially less, indicating that spatial guidance can mitigate this failure without improving the underlying manipulation skills.</p>
+        </div>
+        <div class="comparison-grid">
+          <figure class="trajectory-card">
+            <div class="card-heading"><span class="tag tag-neutral">Flat VLA</span><span class="outcome outcome-wrong">Enters the decoy room</span></div>
+            <img src="assets/trajectory-flat.png" alt="Flat VLA trajectory turns into the decoy room on the right instead of the dining room below" width="1200" height="946" loading="lazy">
+            <figcaption>The flat policy navigates into the room containing the decoy table.</figcaption>
+          </figure>
+          <figure class="trajectory-card">
+            <div class="card-heading"><span class="tag tag-teal">VLA + oracle guidance</span><span class="outcome outcome-right">Reaches the dining room</span></div>
+            <img src="assets/trajectory-oracle.png" alt="Oracle-guided VLA trajectory follows the left passage to the dining table below the kitchen" width="1200" height="946" loading="lazy">
+            <figcaption>The oracle-guided policy navigates to the task-relevant dining table.</figcaption>
+          </figure>
+        </div>
+        <div class="comparison-caption">
+          <p><strong>Motivating experiment, not our learned planner.</strong> These selected trajectory stills illustrate the paper's oracle comparison, for the task &ldquo;Move the pan to the dining table.&rdquo;</p>
+          <div class="room-legend"><span><i class="legend-dining"></i>Dining table</span><span><i class="legend-decoy"></i>Decoy table</span></div>
+        </div>
+        <div id="probe-videos" class="video-section" data-video-section="rollout">
+          <h3>Recorded rollouts</h3>
+          <p class="probe-task"><strong>Task:</strong> Pick up the pan with the steak in it and place it on the dining table. Then place the steak on the plate.</p>
+          <div class="video-grid">
+            <figure class="video-card">
+              <h4>XR-1</h4>
+              <video controls playsinline preload="none" poster="assets/videos/probe-xr1-trial1-4x-poster.png" width="256" height="256" aria-label="XR-1 rollout in an unseen multi-room layout, 4x speed" aria-describedby="probe-xr1-caption">
+                <source src="assets/videos/probe-xr1-trial1-4x.mp4" type="video/mp4">
+                Your browser does not support embedded video.
+              </video>
+              <figcaption id="probe-xr1-caption">The robot explores the kitchen and decoy room but does not reach the dining room.</figcaption>
+            </figure>
+            <figure class="video-card">
+              <h4>Flat &pi;<sub>0.5</sub></h4>
+              <video controls playsinline preload="none" poster="assets/videos/probe-flat-trial1-4x-poster.png" width="256" height="256" aria-label="Flat pi 0.5 rollout in an unseen multi-room layout, 4x speed" aria-describedby="probe-flat-caption">
+                <source src="assets/videos/probe-flat-trial1-4x.mp4" type="video/mp4">
+                Your browser does not support embedded video.
+              </video>
+              <figcaption id="probe-flat-caption">The robot enters the decoy room rather than the dining room.</figcaption>
+            </figure>
+            <figure class="video-card">
+              <h4>&pi;<sub>0.5</sub> + oracle guidance</h4>
+              <video controls playsinline preload="none" poster="assets/videos/probe-oracle-trial1-4x-poster.png" width="256" height="256" aria-label="Pi 0.5 with oracle navigation guidance rollout, 4x speed" aria-describedby="probe-oracle-caption">
+                <source src="assets/videos/probe-oracle-trial1-4x.mp4" type="video/mp4">
+                Your browser does not support embedded video.
+              </video>
+              <figcaption id="probe-oracle-caption">With ground-truth navigation guidance, the robot reaches the dining room but does not complete the task.</figcaption>
+            </figure>
+          </div>
+          <p class="probe-selection">All three policies start from the same saved scene (ServeSteak, trial 1, Unseen-Hard). This episode was selected to show XR-1's movement through the scene; it is not a random sample or an aggregate performance comparison. All head-camera recordings are shown at 4&times; speed. The players are independent. The oracle policy is a privileged probing baseline, not the learned spatial planner.</p>
+          <p id="probe-video-error" class="media-error" role="alert" hidden></p>
+        </div>
+      </section>
+
+      <section id="method" class="method-section" aria-labelledby="method-title">
+        <div class="section-shell">
+          <div class="section-intro">
+            <h2 id="method-title">Spatially grounded hierarchical policy</h2>
+            <p>A high-level VLM planner conditions on a prerecorded environment tour, current egocentric observations, and the task instruction. It predicts subtask instructions and, for navigation subtasks, a binned polar hint specifying the target's distance and bearing relative to the robot base. A low-level &pi;<sub>0.5</sub> VLA predicts actions from the subtask, current egocentric observations, and proprioception, without receiving the tour directly.</p>
+          </div>
+          <figure class="method-figure">
+            <div class="method-figure-scroll" role="region" aria-label="Planner-executor architecture diagram; scroll horizontally on narrow screens" tabindex="0">
+              <div class="architecture" role="group" aria-label="Spatial VLM planner passes a subtask and navigation hint to the VLA executor">
+                <section class="architecture-panel architecture-planner" aria-labelledby="planner-label">
+                  <h3 id="planner-label">Planner</h3>
+                  <div class="architecture-output subtask-text">&ldquo;navigate to the plate (2.0 m, 0.00 rad)&rdquo;</div>
+                  <div class="architecture-model">Spatial VLM</div>
+                  <div class="architecture-inputs planner-inputs">
+                    <div class="architecture-input">
+                      <div class="architecture-tour">
+                        <img src="assets/method-tour-0.jpg" alt="Tour frame: kitchen doorway" width="512" height="512" loading="lazy">
+                        <img src="assets/method-tour-1.jpg" alt="Tour frame: kitchen counters" width="512" height="512" loading="lazy">
+                        <img src="assets/method-tour-2.jpg" alt="Tour frame: passage to the dining area" width="512" height="512" loading="lazy">
+                        <img src="assets/method-tour-3.jpg" alt="Tour frame: dining table" width="512" height="512" loading="lazy">
+                      </div>
+                      <span class="architecture-input-label">Spatial context from offline video</span>
+                    </div>
+                    <div class="architecture-input">
+                      <div class="architecture-ego">
+                        <img src="assets/method-ego-head.png" alt="Planner head-camera observation" width="384" height="384" loading="lazy">
+                        <img src="assets/method-ego-wrist.png" alt="Planner wrist-camera observation" width="384" height="384" loading="lazy">
+                      </div>
+                      <span class="architecture-input-label">Ego</span>
+                    </div>
+                    <div class="architecture-input">
+                      <div class="architecture-task">&ldquo;Pick up the pan with the steak &hellip; place it on the dining table &hellip;&rdquo;</div>
+                      <span class="architecture-input-label">Task</span>
+                    </div>
+                  </div>
+                  <svg class="architecture-arrows" viewBox="0 0 1000 280" preserveAspectRatio="none" aria-hidden="true">
+                    <defs><marker id="planner-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 9 5 1 9Z" fill="#90999f" stroke="none"/></marker></defs>
+                    <path d="M90 153V124" marker-end="url(#planner-arrow)"/>
+                    <path d="M207 153V124" marker-end="url(#planner-arrow)"/>
+                    <path d="M324 153V124" marker-end="url(#planner-arrow)"/>
+                    <path d="M441 153V124" marker-end="url(#planner-arrow)"/>
+                    <path d="M574 153V124" marker-end="url(#planner-arrow)"/>
+                    <path d="M687 153V124" marker-end="url(#planner-arrow)"/>
+                    <path d="M865 153V124" marker-end="url(#planner-arrow)"/>
+                    <path d="M650 65V46" marker-end="url(#planner-arrow)"/>
+                  </svg>
+                </section>
+                <section class="architecture-panel architecture-executor" aria-labelledby="executor-label">
+                  <h3 id="executor-label">Executor</h3>
+                  <div class="architecture-output action-output">
+                    <span>Actions <i>a</i><sub>t:t+H</sub></span>
+                    <div class="action-chunk" role="img" aria-label="Predicted action chunk"><span></span><span></span><span></span><span></span></div>
+                  </div>
+                  <div class="architecture-model">VLA</div>
+                  <div class="architecture-inputs executor-inputs">
+                    <div class="architecture-input">
+                      <div class="architecture-subtask subtask-text">&ldquo;navigate to the plate (2.0 m, 0.00 rad)&rdquo;</div>
+                      <span class="architecture-input-label">Subtask</span>
+                    </div>
+                    <div class="architecture-input">
+                      <div class="architecture-ego">
+                        <img src="assets/method-ego-head.png" alt="Executor head-camera observation" width="384" height="384" loading="lazy">
+                        <img src="assets/method-ego-wrist.png" alt="Executor wrist-camera observation" width="384" height="384" loading="lazy">
+                      </div>
+                      <span class="architecture-input-label">Ego</span>
+                    </div>
+                    <div class="architecture-input">
+                      <div class="proprio-visual"><div class="proprio-vector" role="img" aria-label="Current proprioceptive state vector"><span></span><span></span><span></span><span></span><span></span></div></div>
+                      <span class="architecture-input-label">Proprio</span>
+                    </div>
+                  </div>
+                  <svg class="architecture-arrows" viewBox="0 0 1000 280" preserveAspectRatio="none" aria-hidden="true">
+                    <defs><marker id="executor-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="16" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M1 1 9 5 1 9Z" fill="#90999f" stroke="none"/></marker></defs>
+                    <path d="M158 153V124" marker-end="url(#executor-arrow)"/>
+                    <path d="M408 153V124" marker-end="url(#executor-arrow)"/>
+                    <path d="M618 153V124" marker-end="url(#executor-arrow)"/>
+                    <path d="M855 172V124" marker-end="url(#executor-arrow)"/>
+                    <path d="M783 65V39" marker-end="url(#executor-arrow)"/>
+                    <path d="M832 65V39" marker-end="url(#executor-arrow)"/>
+                    <path d="M881 65V39" marker-end="url(#executor-arrow)"/>
+                    <path d="M930 65V39" marker-end="url(#executor-arrow)"/>
+                  </svg>
+                </section>
+                <svg class="architecture-handoff" viewBox="0 0 1000 280" preserveAspectRatio="none" aria-hidden="true">
+                  <defs><marker id="handoff-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="m0 0 10 5-10 5z"/></marker></defs>
+                  <path d="M504 28H530Q540 28 540 40V177Q540 190 553 190H575" marker-end="url(#handoff-arrow)"/>
+                </svg>
+              </div>
+            </div>
+            <figcaption>The planner receives spatial context from an offline video and predicts subtask instructions with navigation hints. The executor receives the subtask, egocentric observations, and proprioception, and predicts actions. The example instruction is illustrative.</figcaption>
+          </figure>
+          <p class="method-note">In the Q3D variant, tour depth and camera poses lift the views into a point cloud. In the estimated-geometry setting, Depth Anything 3 estimates depth and poses from RGB, and a SLAM-style module relocalizes current views against the tour reconstruction during execution. The ground-truth geometry variant instead receives simulator depth and camera poses.</p>
+          <div id="tour-videos" class="video-section" data-video-section="tour">
+            <h3>Sample environment tours</h3>
+            <p class="tour-description">Before task execution, the planner receives a single prerecorded tour of the environment. These examples show the visual context available in each evaluation setting; they are not robot task rollouts.</p>
+            <div class="video-grid">
+              <figure class="video-card">
+                <h4>Seen</h4>
+                <video controls playsinline preload="none" poster="assets/videos/tour-seen-poster.png" width="512" height="512" aria-label="Sample Seen environment tour, original playback speed" aria-describedby="tour-seen-caption">
+                  <source src="assets/videos/tour-seen.mp4" type="video/mp4">
+                  Your browser does not support embedded video.
+                </video>
+                <figcaption id="tour-seen-caption">A training kitchen, with all task-relevant objects in the kitchen.</figcaption>
+              </figure>
+              <figure class="video-card">
+                <h4>Unseen-Easy</h4>
+                <video controls playsinline preload="none" poster="assets/videos/tour-easy-poster.png" width="512" height="512" aria-label="Sample Unseen-Easy environment tour, original playback speed" aria-describedby="tour-easy-caption">
+                  <source src="assets/videos/tour-easy.mp4" type="video/mp4">
+                  Your browser does not support embedded video.
+                </video>
+                <figcaption id="tour-easy-caption">A new layout, with the dining table moved into a separate room.</figcaption>
+              </figure>
+              <figure class="video-card">
+                <h4>Unseen-Hard</h4>
+                <video controls playsinline preload="none" poster="assets/videos/tour-hard-poster.png" width="512" height="512" aria-label="Sample Unseen-Hard environment tour, original playback speed" aria-describedby="tour-hard-caption">
+                  <source src="assets/videos/tour-hard.mp4" type="video/mp4">
+                  Your browser does not support embedded video.
+                </video>
+                <figcaption id="tour-hard-caption">A new layout with a separate dining room and an additional room containing a decoy table.</figcaption>
+              </figure>
+            </div>
+            <p class="tour-note">Selected ServeSteak tours: trial 1 in Seen and Unseen-Easy, and trial 16 in Unseen-Hard. Each six-second tour is shown at its original playback speed. The rollout videos above remain at 4&times; speed.</p>
+            <p id="tour-video-error" class="media-error" role="alert" hidden></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="representations" class="section-shell content-section" aria-labelledby="representations-title">
+        <div class="section-intro">
+          <h2 id="representations-title">Controlled study of spatial representations</h2>
+          <p>We instantiate spatial learning recipes with a Qwen3-VL-4B backbone, a shared data mix, and a fixed gradient-step budget. Models are trained to predict target bearings from a tour and egocentric query views. Geometric supervision and features improve spatial prediction, but in-distribution accuracy does not reliably predict transfer to RoboCasa. Among tour-conditioned models, Q3D has the lowest bearing accuracy on held-out MolmoSpaces houses and the highest on the target RoboCasa layouts.</p>
+        </div>
+        <div id="spatial-samples" class="video-section" data-video-section="dataset">
+          <h3>Training and evaluation examples</h3>
+          <p class="dataset-description">
+            Here we visualize examples from both the training and evaluation datasets, highlighting the robot's tour context and current query views. On the left, we visualize a sample from the MolmoSpaces-generated training data. On the right, we visualize a sample from the RoboCasa evaluation data. 
+            <!-- Each example pairs a tour with the robot's current shoulder-camera views and a question about a target seen in the tour. The target is in another room in these examples. The labels below are simulator ground truth, not model predictions. -->
+          </p>
+          <div class="spatial-example-grid">
+            <article class="video-card spatial-example" aria-labelledby="molmo-example-title">
+              <h4 id="molmo-example-title">MolmoSpaces &middot; training data</h4>
+              <h5>Tour context</h5>
+              <video controls playsinline preload="none" poster="assets/videos/spatial-molmo-tour-poster.png" width="480" height="480" aria-label="MolmoSpaces training example: full two-room tour, original speed">
+                <source src="assets/videos/spatial-molmo-tour.mp4" type="video/mp4">
+                Your browser does not support embedded video.
+              </video>
+              <h5>Current query views</h5>
+              <div class="query-view-grid">
+                <figure>
+                  <img src="assets/spatial-molmo-query-left.png" alt="MolmoSpaces left shoulder view at the query pose, facing a kitchen window" width="256" height="256" loading="lazy">
+                  <figcaption>Left shoulder</figcaption>
+                </figure>
+                <figure>
+                  <img src="assets/spatial-molmo-query-right.png" alt="MolmoSpaces right shoulder view at the same query pose, showing the counter and window" width="256" height="256" loading="lazy">
+                  <figcaption>Right shoulder</figcaption>
+                </figure>
+              </div>
+              <dl class="sample-labels">
+                <div><dt>Question</dt><dd>In which direction is the vase, relative to the robot's current forward axis?</dd></div>
+                <div><dt>Ground-truth bearing</dt><dd><strong>179.3&deg;</strong>; nearest 16-bin label: <strong>180&deg;</strong> (behind).</dd></div>
+              </dl>
+            </article>
+            <article class="video-card spatial-example" aria-labelledby="robo-example-title">
+              <h4 id="robo-example-title">RoboCasa &middot; evaluation data</h4>
+              <h5>Tour context</h5>
+              <video controls playsinline preload="none" poster="assets/videos/spatial-robo-l90-t29-tour-poster.png" width="512" height="512" aria-label="RoboCasa spatial-evaluation example: full environment tour, original speed">
+                <source src="assets/videos/spatial-robo-l90-t29-tour.mp4" type="video/mp4">
+                Your browser does not support embedded video.
+              </video>
+              <h5>Current query views</h5>
+              <div class="query-view-grid">
+                <figure>
+                  <img src="assets/spatial-robo-l90-t29-q2-query-left.png" alt="RoboCasa left shoulder query view in layout 90, with the robot arm and tiled kitchen floor" width="256" height="256" loading="lazy">
+                  <figcaption>Left shoulder</figcaption>
+                </figure>
+                <figure>
+                  <img src="assets/spatial-robo-l90-t29-q2-query-right.png" alt="RoboCasa right shoulder view at the same query pose, showing the kitchen counter and doorway" width="256" height="256" loading="lazy">
+                  <figcaption>Right shoulder</figcaption>
+                </figure>
+              </div>
+              <dl class="sample-labels">
+                <div><dt>Question</dt><dd>In which direction is the plate in the adjoining dining room, relative to the robot's current forward axis?</dd></div>
+                <div><dt>Ground-truth bearing</dt><dd><strong>45.0&deg;</strong>; nearest 16-bin label: <strong>45&deg;</strong> (ahead and to the left).</dd></div>
+              </dl>
+            </article>
+          </div>
+          <p class="spatial-note">Both examples pair an earlier environment tour with the robot's current views. The model must use the tour to infer the direction to an object that is now out of sight: a vase in the MolmoSpaces training example and a plate in the RoboCasa evaluation example.</p>
+          <p id="spatial-video-error" class="media-error" role="alert" hidden></p>
+        </div>
+        <div class="representation-grid">
+          <article><span class="family-index">A</span><h3>Implicit spatial learning</h3><p>Learn spatial relationships from RGB video and question-answer supervision.</p><span>CS &middot; Cambrian-S style</span></article>
+          <article><span class="family-index">B</span><h3>Geometric supervision / features</h3><p>Encourage geometry through camera-pose prediction or geometry-aware input features.</p><span>CP &middot; Cambrian-P style / V3R &middot; VLM-3R style</span></article>
+          <article class="explicit-family"><span class="family-index">C</span><h3>Explicit 3D representation</h3><p>Represent the scene as a point cloud with 3D positional encodings.</p><span>Q3D &middot; Qwen-3D style</span></article>
+        </div>
+        <div class="transfer-block">
+          <div><h3>Bearing prediction results</h3><p>Bearing accuracy (%) for selected models. Q3D uses <strong>ground-truth tour geometry</strong> in this spatial study; these are not robot placement rates. The comparison does not establish that explicit 3D inputs are universally superior: finetuning and generalization remain factors in the observed differences.</p></div>
+          <div class="table-scroll">
+            <table class="transfer-table">
+              <caption class="sr-only">Spatial bearing prediction accuracy for selected midtrained models</caption>
+              <thead><tr><th scope="col">Evaluation distribution</th><th scope="col">CS</th><th scope="col">V3R</th><th scope="col">Q3D</th></tr></thead>
+              <tbody><tr><th scope="row">Held-out MolmoSpaces houses</th><td>70.3</td><td><strong>72.0</strong></td><td>46.7</td></tr><tr><th scope="row">RoboCasa &middot; Easy</th><td>45.0</td><td>50.2</td><td class="best">67.0</td></tr><tr><th scope="row">RoboCasa &middot; Hard</th><td>39.3</td><td>40.1</td><td class="best">56.5</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="results" class="results-section" aria-labelledby="results-title">
+        <div class="section-shell">
+          <div class="section-intro">
+            <h2 id="results-title">Mobile manipulation evaluation</h2>
+            <p>We evaluate ten navigation-heavy tasks in an unseen multi-room extension of RoboCasa365. Each setting contains 200 episodes, with 20 episodes per task. All tour-conditioned planner variants share the same low-level executor, allowing us to study the effect of the planner's spatial representation on downstream control.</p>
+          </div>
+          <div class="layout-grid">
+            <article><span class="layout-number">01</span><h3>Seen</h3><p>Training kitchens; task-relevant locations remain in the kitchen.</p></article>
+            <article><span class="layout-number">02</span><h3>Unseen-Easy</h3><p>New layouts move the dining table to a connected, separate room.</p></article>
+            <article><span class="layout-number">03</span><h3>Unseen-Hard</h3><p>An additional room contains a decoy table, creating an ambiguous navigation choice.</p></article>
+          </div>
+          <div class="results-card">
+            <div class="results-card-heading">
+              <div><h3>Placement rate</h3><p>200 episodes per setting &middot; 10 tasks &times; 20 episodes</p></div>
+              <div class="setting-selector" role="group" aria-label="Choose evaluation setting">
+                <button type="button" data-setting="seen" aria-pressed="false">Seen</button>
+                <button type="button" data-setting="easy" aria-pressed="false">Unseen-Easy</button>
+                <button type="button" data-setting="hard" aria-pressed="true">Unseen-Hard</button>
+              </div>
+            </div>
+            <div id="placement-chart" class="placement-chart" role="img" aria-label="Unseen-Hard placement rate: flat policy 10.9%, Qwen3D policy with estimated geometry 24.8%, Qwen3D policy with privileged ground-truth geometry 32.5%">
+              <div class="chart-row"><span class="bar-label">Flat &pi;<sub>0.5</sub><small>Baseline</small></span><div class="bar-track"><div class="bar bar-flat" style="--bar-size:21.8%"></div></div><strong class="bar-value">10.9%</strong></div>
+              <div class="chart-row"><span class="bar-label">Qwen3D policy<small>Estimated geometry</small></span><div class="bar-track"><div class="bar bar-ours" style="--bar-size:49.6%"></div></div><strong class="bar-value">24.8%</strong></div>
+              <div class="chart-row"><span class="bar-label">Qwen3D policy<small>Ground-truth geometry (privileged)</small></span><div class="bar-track"><div class="bar bar-gt" style="--bar-size:65%"></div></div><strong class="bar-value">32.5%</strong></div>
+              <div class="chart-axis" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span></div>
+            </div>
+            <p id="chart-summary" class="chart-summary" aria-live="polite">In Unseen-Hard, Qwen3D with estimated geometry achieves 24.8% versus 10.9% for the flat policy: a 13.9 percentage-point gain.</p>
+            <p class="metric-note"><strong>What is placement rate?</strong> The fraction of a task's required placements completed, averaged over episodes. It is not full-task success. Ground-truth tour geometry is privileged information, shown separately from the RGB-based method.</p>
+            <details class="full-results" open>
+              <summary>See all planner comparisons <span aria-hidden="true">+</span></summary>
+              <div class="table-scroll">
+                <table>
+                  <caption>Placement rate (%) by method and evaluation setting</caption>
+                  <thead><tr><th scope="col">Method</th><th scope="col">Seen</th><th scope="col">Unseen-Easy</th><th scope="col">Unseen-Hard</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row">Flat &pi;<sub>0.5</sub></th><td>41.6</td><td>20.4</td><td>10.9</td></tr>
+                    <tr><th scope="row">Hierarchical &pi;<sub>0.5</sub>, no navigation hint</th><td>38.9</td><td>21.3</td><td>13.0</td></tr>
+                    <tr><th scope="row">Stock Qwen3-VL-4B planner</th><td>30.8</td><td>23.6</td><td>13.6</td></tr>
+                    <tr><th scope="row">CS planner</th><td>33.9</td><td>18.9</td><td>13.0</td></tr>
+                    <tr><th scope="row">CP planner</th><td>38.1</td><td>26.7</td><td>17.8</td></tr>
+                    <tr><th scope="row">V3R planner</th><td>36.7</td><td>26.9</td><td>18.6</td></tr>
+                    <tr class="highlight-row"><th scope="row">Q3D planner, estimated geometry</th><td>37.0</td><td>27.6</td><td>24.8</td></tr>
+                    <tr class="privileged-row"><th scope="row">Q3D planner, ground-truth geometry (privileged)</th><td>36.3</td><td>34.4</td><td>32.5</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+          <div id="paired-rollouts" class="video-section" data-video-section="paired planner rollout" aria-labelledby="paired-rollouts-title">
+            <h3 id="paired-rollouts-title">Paired planner rollouts</h3>
+            <div class="rollout-explanation">
+              <p>We visualize rollouts on the ServeSteak task from three hierarchical policies with different planners and a shared low-level executor. In the videos, we add a red overlay when the planner predicts an inaccurate navigation hint. We observe that stock Qwen3-VL and VLM-3R-based planners predict incorrect hints, leading the robot to enter the decoy room. At the same time, the Q3D planner with privileged ground-truth tour geometry provides accurate hints, allowing the robot to reach the correct room.</p>
+              <p>These rollouts illustrate how a spatial prediction error can become a navigation failure: the executor follows the planner's instruction, but travels to the wrong room. In this matched comparison, more accurate spatial guidance allows the same executor to complete the task, illustrating why navigation-hint quality matters for mobile manipulation.</p>
+            </div>
+            <div class="video-grid">
+              <figure id="rollout-stock" class="video-card">
+                <h4>Stock Qwen3-VL</h4>
+                <video controls controlslist="nofullscreen nodownload" playsinline preload="metadata" poster="assets/videos/paired-stock-trial11-4x-poster.png" width="256" height="256" aria-label="Stock Qwen3-VL matched-state rollout, 4x speed" aria-describedby="paired-rollouts-caption">
+                  <source src="assets/videos/paired-stock-trial11-4x.mp4" type="video/mp4">
+                  Your browser does not support embedded video.
+                </video>
+                <figcaption>Enters the decoy room rather than the dining room.</figcaption>
+              </figure>
+              <figure id="rollout-v3r" class="video-card">
+                <h4>VLM-3R</h4>
+                <video controls controlslist="nofullscreen nodownload" playsinline preload="metadata" poster="assets/videos/paired-v3r-trial11-4x-poster.png" width="256" height="256" aria-label="VLM-3R matched-state rollout, 4x speed" aria-describedby="paired-rollouts-caption">
+                  <source src="assets/videos/paired-v3r-trial11-4x.mp4" type="video/mp4">
+                  Your browser does not support embedded video.
+                </video>
+                <figcaption>Follows an incorrect forward-bearing hint into the decoy room and never reaches the dining room.</figcaption>
+              </figure>
+              <figure id="rollout-q3d-gt" class="video-card">
+                <h4>Q3D &middot; GT geometry (privileged)</h4>
+                <video controls controlslist="nofullscreen nodownload" playsinline preload="metadata" poster="assets/videos/paired-q3d-gt-trial11-4x-poster.png" width="256" height="256" aria-label="Q3D with privileged ground-truth geometry matched-state rollout, 4x speed" aria-describedby="paired-rollouts-caption">
+                  <source src="assets/videos/paired-q3d-gt-trial11-4x.mp4" type="video/mp4">
+                  Your browser does not support embedded video.
+                </video>
+                <figcaption>Reaches the dining room and completes the task.</figcaption>
+              </figure>
+            </div>
+            <p id="paired-rollouts-caption" class="probe-selection">Unseen-Hard rollouts with the original predicted subtasks, shown at 4&times; speed. Red tint means the predicted navigation bearing differs by more than one 22.5 degree bin from ground truth.</p>
+            <p class="media-error" role="alert" hidden></p>
+          </div>
+          <figure id="accuracy-placement" class="accuracy-figure">
+            <h3>Navigation-hint accuracy and placement rate</h3>
+            <div id="accuracy-interactive" hidden>
+              <div class="scatter-controls">
+                <fieldset class="scatter-settings">
+                  <legend>Evaluation setting</legend>
+                  <button type="button" data-scatter-setting="all" aria-pressed="true">All settings</button>
+                  <button type="button" data-scatter-setting="seen" aria-pressed="false"><span class="setting-dot setting-seen" aria-hidden="true"></span>Seen</button>
+                  <button type="button" data-scatter-setting="easy" aria-pressed="false"><span class="setting-dot setting-easy" aria-hidden="true"></span>Unseen-Easy</button>
+                  <button type="button" data-scatter-setting="hard" aria-pressed="false"><span class="setting-dot setting-hard" aria-hidden="true"></span>Unseen-Hard</button>
+                </fieldset>
+                <label class="scatter-planner-label">Planner<select id="scatter-planner"><option value="all">All planners</option></select></label>
+              </div>
+              <p class="scatter-instructions">Hover, tap, or focus a point to inspect its results. Select a point with Enter or Space. The matching Unseen-Hard examples link to the videos above.</p>
+              <div class="scatter-layout">
+                <div class="scatter-chart">
+                  <svg id="accuracy-scatter" role="group" aria-labelledby="scatter-title scatter-description"></svg>
+                  <ul class="scatter-legend" aria-label="Planner marker shapes"></ul>
+                </div>
+                <div id="scatter-details" class="scatter-details" aria-live="polite"></div>
+              </div>
+              <p id="scatter-status" class="scatter-status" role="status"></p>
+            </div>
+            <a data-static-correlation href="assets/hint-accuracy-placement.png" aria-label="Open full-size navigation-hint accuracy versus placement-rate plot">
+              <img src="assets/hint-accuracy-placement.png" alt="Scatter plot of navigation-hint bearing accuracy versus placement rate for 18 planner-setting pairs. Higher hint accuracy is associated with higher placement rate. Colors distinguish Seen, Unseen-Easy, and Unseen-Hard; marker shapes distinguish planners, with open stars for privileged ground-truth geometry." width="887" height="796" loading="lazy" aria-describedby="accuracy-placement-caption">
+            </a>
+            <p class="scatter-error media-error" role="alert" hidden></p>
+            <figcaption id="accuracy-placement-caption">Navigation-hint bearing accuracy during rollouts versus placement rate across 18 planner-setting pairs (Pearson <i>r</i> = 0.89). A prediction is counted as correct when it is within one angular bin of the ground-truth bearing (16 bins total), over all VLM navigation queries. The dotted line marks chance accuracy (18.8%). Filled stars use estimated geometry; open stars use privileged ground-truth tour geometry. Higher hint accuracy is associated with better downstream mobile manipulation performance.</figcaption>
+          </figure>
+          <div class="results-discussion">
+            <h3>Summary of findings</h3>
+            <p>In Unseen-Hard, Q3D with estimated geometry achieves a placement rate of 24.8%, compared with 10.9% for the flat policy trained on the same robot data. It retains 67% of its Seen placement rate, whereas the flat policy retains 26%. Hierarchy alone, or a tour-conditioned planner without spatial midtraining, does not produce a comparable improvement.</p>
+            <p>Navigation-hint bearing accuracy during rollouts is correlated with placement rate (Pearson <i>r</i> = 0.89 across 18 planner-setting pairs). Q3D reaches 32.5% placement rate with ground-truth geometry, 7.7 percentage points above the estimated-geometry variant in Unseen-Hard. This gap suggests that recovering accurate geometry from RGB remains an important bottleneck.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="takeaways" class="section-shell content-section" aria-labelledby="takeaways-title">
+        <div class="section-intro">
+          <h2 id="takeaways-title">Takeaways</h2>
+          <p>Our experiments in simulated multi-room environments support the following conclusions.</p>
+        </div>
+        <ol class="takeaway-list">
+          <li><h3>Spatial generalization is a bottleneck for mobile manipulation.</h3><p>Strong local navigation and manipulation skills do not by themselves provide knowledge of task-relevant locations in unfamiliar layouts. Oracle spatial guidance substantially reduces the degradation under layout shift, suggesting that scaling robot data alone may not be sufficient.</p></li>
+          <li><h3>In-distribution spatial accuracy does not reliably predict transfer.</h3><p>Models with strong bearing prediction on held-out houses from the midtraining distribution can transfer poorly to RoboCasa. Explicit 3D representations transfer most robustly in our study, supporting evaluation of spatial models on new environments and downstream behavior rather than only on their training distribution.</p></li>
+          <li><h3>More accurate navigation hints are associated with better robot performance.</h3><p>Hint accuracy during rollouts closely tracks placement rate (Pearson <i>r</i> = 0.89). With geometry estimated from the tour, the hierarchical Q3D policy achieves 24.8% placement rate in Unseen-Hard, compared with 10.9% for the flat policy trained on the same robot data.</p></li>
+          <li><h3>Reconstructing accurate geometry remains an important bottleneck.</h3><p>Ground-truth tour geometry raises Q3D's Unseen-Hard placement rate from 24.8% to 32.5%. This privileged comparison indicates substantial room to improve the spatial structure recovered from RGB video.</p></li>
+        </ol>
+      </section>
+    </main>
+    <footer class="site-footer section-shell"><span>Knowing Where to Go</span><a href="#main">Back to top</a></footer>
+  </body>
+</html>

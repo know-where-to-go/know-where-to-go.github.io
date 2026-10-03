@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Preview paper website",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"preview.mjs"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
